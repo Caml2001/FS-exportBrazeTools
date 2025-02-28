@@ -1,6 +1,6 @@
 # Exportador de Datos de Braze
 
-Esta herramienta permite exportar datos de usuarios desde Braze utilizando la API oficial.
+Esta herramienta permite exportar datos de usuarios desde Braze utilizando la API oficial de Braze y bibliotecas de Node.js. Está diseñada para automatizar o ejecutar paso a paso el proceso de solicitud, descarga, extracción y procesamiento de datos de usuarios.
 
 ## 🔴 COMANDO RÁPIDO PARA PROCESO COMPLETO AUTOMÁTICO
 
@@ -10,61 +10,67 @@ Para ejecutar todo el proceso de forma automática (solicitud, descarga, extracc
 # Proceso completo automático (desde la solicitud hasta el procesamiento)
 node braze-export-tool.js --all [ID_SEGMENTO] [TIEMPO_ESPERA_SEGUNDOS]
 
-# Por ejemplo (usando el segmento de todos los usuarios):
+# Ejemplo (usando el segmento de todos los usuarios):
 node braze-export-tool.js --all
 ```
 
-Si ya tienes una URL de descarga y quieres continuar desde ahí:
+Si ya tienes una URL de descarga y deseas continuar desde ese punto:
 
 ```bash
 # Continuar desde una URL de descarga hasta el procesamiento
 node braze-export-tool.js --continue URL_DESCARGA [MAX_USUARIOS]
 
-# Por ejemplo:
+# Ejemplo:
 node braze-export-tool.js --continue https://bucket.s3.amazonaws.com/archivo.zip 10000
 ```
 
 ## Requisitos
 
-- Node.js (versión 14 o superior)
-- Una cuenta de Braze con acceso a la API
-- Clave de API de Braze con permisos de exportación de usuarios
+- **Node.js**: Versión 14 o superior
+- **Cuenta de Braze**: Con acceso a la API
+- **Clave de API de Braze**: Con permisos para exportar usuarios
+- **Dependencias**: Instaladas mediante `npm install`
 
 ## Instalación
 
-1. Clona este repositorio
-2. Instala las dependencias:
+1. **Clona el repositorio**:
+   ```bash
+   git clone <URL_DEL_REPOSITORIO>
+   cd <NOMBRE_DEL_REPOSITORIO>
+   ```
 
-```bash
-npm install
-```
+2. **Instala las dependencias**:
+   ```bash
+   npm install
+   ```
 
-3. Configura el archivo `.env` con tus credenciales:
+3. **Configura el archivo `.env`**:
+   Crea un archivo `.env` en la raíz del proyecto y añade las siguientes variables (ajusta los valores según tu configuración):
 
-```
-BRAZE_API_KEY=tu_api_key_aquí
-BRAZE_API_URL=https://rest.iad-XX.braze.com  # Reemplaza XX con tu instancia
-EXPORT_DIRECTORY=./exports
-ALL_USERS_SEGMENT_ID=id_del_segmento_todos_los_usuarios
+   ```
+   BRAZE_API_KEY=tu_api_key_aquí
+   BRAZE_API_URL=https://rest.iad-XX.braze.com  # Reemplaza XX con tu instancia de Braze
+   EXPORT_DIRECTORY=./exports
+   ALL_USERS_SEGMENT_ID=id_del_segmento_todos_los_usuarios
 
-# AWS Credentials (opcional, para acceder a S3)
-AWS_ACCESS_KEY_ID=tu_access_key_id
-AWS_SECRET_ACCESS_KEY=tu_secret_access_key
-AWS_REGION=us-east-1
-```
+   # Credenciales AWS (opcional, para descargas desde S3)
+   AWS_ACCESS_KEY_ID=tu_access_key_id
+   AWS_SECRET_ACCESS_KEY=tu_secret_access_key
+   AWS_REGION=us-east-1
+   ```
 
 ## Guía detallada de comandos
 
 ### Todos los comandos disponibles
 
 ```bash
-# Ver ayuda y opciones disponibles
+# Mostrar ayuda y opciones disponibles
 node braze-export-tool.js --help
 
 # 1. Solicitar una exportación a Braze
 node braze-export-tool.js --export [ID_SEGMENTO]
 
-# 2. Descargar un archivo de exportación usando la URL
+# 2. Descargar un archivo de exportación desde una URL
 node braze-export-tool.js --download URL_ARCHIVO
 
 # 3. Extraer archivos de un ZIP descargado
@@ -73,7 +79,7 @@ node braze-export-tool.js --extract RUTA_ARCHIVO_ZIP
 # 4. Procesar archivos extraídos
 node braze-export-tool.js --process DIRECTORIO_EXTRAIDO [MAX_USUARIOS]
 
-# 5. Proceso completo automático (desde solicitud hasta procesamiento)
+# 5. Ejecutar el proceso completo automáticamente
 node braze-export-tool.js --all [ID_SEGMENTO] [TIEMPO_ESPERA_SEGUNDOS]
 
 # 6. Continuar desde una URL de descarga hasta el procesamiento
@@ -82,71 +88,68 @@ node braze-export-tool.js --continue URL_DESCARGA [MAX_USUARIOS]
 
 ### Flujo de trabajo recomendado
 
-Puedes elegir entre dos flujos de trabajo principales:
-
 #### Opción 1: Proceso completo automático
 
-Este es el método más sencillo y recomendado:
+El método más rápido y sencillo:
 
 ```bash
-# Todo el proceso en un solo comando:
+# Todo en un solo paso:
 node braze-export-tool.js --all
 ```
 
-Este comando:
+**Qué hace este comando**:
 1. Solicita la exportación a Braze
-2. Espera a que esté lista (por defecto 300 segundos)
-3. Descarga el archivo automáticamente
-4. Extrae los archivos
-5. Procesa los datos
+2. Espera a que el archivo esté listo (por defecto, 300 segundos, ajustable con `[TIEMPO_ESPERA_SEGUNDOS]`)
+3. Descarga el archivo ZIP
+4. Extrae los contenidos
+5. Procesa los datos y genera los resultados
 
 #### Opción 2: Proceso por etapas
 
-Si prefieres ejecutar el proceso paso a paso:
+Para mayor control, ejecuta el proceso paso a paso:
 
 1. **Solicitar exportación**:
    ```bash
-   node braze-export-tool.js --export
+   node braze-export-tool.js --export [ID_SEGMENTO]
    ```
-   ⚠️ Esto te dará una URL de descarga que debes guardar.
+   - Devuelve una URL de descarga que debes guardar.
+   - Si omites `[ID_SEGMENTO]`, usa el segmento configurado en `ALL_USERS_SEGMENT_ID`.
 
 2. **Continuar desde la URL**:
    ```bash
-   node braze-export-tool.js --continue URL_DE_DESCARGA
+   node braze-export-tool.js --continue URL_DESCARGA
    ```
-   Este comando completará el resto del proceso desde la descarga hasta el procesamiento.
+   - Descarga el archivo, lo extrae y procesa los datos automáticamente.
 
-### Comandos individuales (para casos especiales)
+### Comandos individuales (para casos específicos)
 
-Si necesitas ejecutar solo pasos específicos:
-
-- **Descargar un archivo**: Útil si ya tienes una URL de exportación
+- **Descargar un archivo**:
   ```bash
   node braze-export-tool.js --download URL_ARCHIVO
   ```
 
-- **Extraer un ZIP**: Si ya has descargado manualmente un archivo
+- **Extraer un ZIP**:
   ```bash
-  node braze-export-tool.js --extract ./exports/export_file.zip
+  node braze-export-tool.js --extract ./exports/archivo.zip
   ```
 
-- **Procesar archivos**: Si ya has extraído los archivos
+- **Procesar archivos extraídos**:
   ```bash
   node braze-export-tool.js --process ./exports/extract_dir
   ```
-  Puedes limitar el número de usuarios añadiendo un número al final:
-  ```bash
-  node braze-export-tool.js --process ./exports/extract_dir 10000
-  ```
+  - Limita los usuarios procesados añadiendo `[MAX_USUARIOS]`:
+    ```bash
+    node braze-export-tool.js --process ./exports/extract_dir 10000
+    ```
 
 ## Estructura del proyecto
 
-- `braze-export-tool.js`: **Herramienta unificada** para todo el proceso de exportación
-- `.env`: Archivo de configuración con credenciales
-- `exports/`: Directorio donde se guardan los archivos exportados
-  - `archive/`: Subdirectorio donde se almacenan los archivos ZIP y resultados antiguos
-  - `extract_FECHA/`: Directorios temporales con los archivos extraídos
-  - `usuarios_procesados_FECHA.json`: Archivos de resultados procesados
+- **`braze-export-tool.js`**: Script principal que ejecuta todas las operaciones
+- **`.env`**: Archivo de configuración con credenciales y variables
+- **`exports/`**: Directorio para los archivos generados
+  - **`archive/`**: Almacena ZIPs descargados y resultados antiguos
+  - **`extract_FECHA/`**: Directorios temporales con archivos extraídos (ej. `extract_2023-10-15_14-30-00`)
+  - **`usuarios_procesados_FECHA.json`**: Resultados procesados (ej. `usuarios_procesados_2023-10-15_14-30-00.json`)
 
 ## Casos de uso comunes
 
@@ -156,7 +159,7 @@ Si necesitas ejecutar solo pasos específicos:
 node braze-export-tool.js --all
 ```
 
-### Exportar usuarios de un segmento específico
+### Exportar un segmento específico
 
 ```bash
 node braze-export-tool.js --all ID_SEGMENTO
@@ -165,46 +168,46 @@ node braze-export-tool.js --all ID_SEGMENTO
 ### Procesar un archivo ZIP ya descargado
 
 ```bash
-# 1. Extraer archivos
-node braze-export-tool.js --extract ./exports/archive/export_download.zip
+# 1. Extraer el archivo ZIP
+node braze-export-tool.js --extract ./exports/archive/export.zip
 
-# 2. Procesar los datos (suponiendo que se extrajeron a extract_2025-02-28_17-03-52)
-node braze-export-tool.js --process ./exports/extract_2025-02-28_17-03-52
+# 2. Procesar los datos extraídos
+node braze-export-tool.js --process ./exports/extract_2023-10-15_14-30-00
 ```
 
 ## Notas importantes
 
-- Las exportaciones de Braze pueden tardar varios minutos en completarse.
-- Solo se puede tener una exportación activa por segmento al mismo tiempo.
-- Las URLs de descarga proporcionadas por Braze suelen expirar después de unas horas.
-- Para conjuntos de datos muy grandes, la herramienta divide los resultados en múltiples archivos (máximo 1,000,000 usuarios por archivo).
+- **Tiempo de espera**: Las exportaciones de Braze pueden tardar minutos en generarse, especialmente con grandes volúmenes de datos.
+- **Límite por segmento**: Solo una exportación activa por segmento a la vez.
+- **Expiración de URLs**: Las URLs de descarga de Braze expiran tras pocas horas.
+- **Datos grandes**: La herramienta divide automáticamente los resultados en archivos de máximo 1,000,000 usuarios por archivo.
 
 ## Solución de problemas
 
 ### Error "Invalid Braze API URL"
-- Verifica que el valor de `BRAZE_API_URL` en tu archivo `.env` sea una cadena de texto correcta.
-- Ejemplo correcto: `BRAZE_API_URL=https://rest.iad-07.braze.com`
+- Verifica `BRAZE_API_URL` en `.env`. Ejemplo correcto:
+  ```
+  BRAZE_API_URL=https://rest.iad-07.braze.com
+  ```
 
-### Error "Acceso Denegado" al descargar de S3
-- Verifica tus credenciales AWS en el archivo `.env`
-- Es posible que la URL haya expirado (suelen durar pocas horas)
-- Intenta usar un archivo ZIP ya descargado con el comando `--extract`
+### Error "Acceso Denegado" al descargar desde S3
+- Revisa las credenciales AWS en `.env`.
+- Si la URL expiró, descarga manualmente el ZIP y usa `--extract`.
 
 ### Error "El directorio no existe" al procesar
-- Asegúrate de usar la ruta correcta del directorio de extracción
-- Puedes listar los directorios disponibles en la carpeta `exports/`
-- Ejemplo: `ls -la exports/`
-
-### Error de memoria al procesar muchos usuarios
-- La herramienta ahora divide automáticamente los resultados en múltiples archivos
-- Puedes limitar el número de usuarios a procesar añadiendo un número al final:
+- Confirma la ruta del directorio de extracción:
   ```bash
-1. Verifica que tu API key tenga los permisos necesarios
-2. Comprueba que la URL de la API sea correcta para tu instancia de Braze
-3. Revisa los logs para identificar errores específicos
-4. Para problemas de acceso a S3, verifica tus credenciales AWS
+  ls -la exports/  # En Linux/Mac
+  dir exports\     # En Windows
+  ```
+
+### Error de memoria con muchos usuarios
+- Limita los usuarios procesados:
+  ```bash
+  node braze-export-tool.js --process ./exports/extract_dir 500000
+  ```
 
 ## Recursos adicionales
 
 - [Documentación de la API de Braze](https://www.braze.com/docs/api/basics/)
-- [Biblioteca braze-api](https://www.npmjs.com/package/braze-api) 
+- [Biblioteca braze-api en npm](https://www.npmjs.com/package/braze-api)
