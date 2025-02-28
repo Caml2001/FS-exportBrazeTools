@@ -1,0 +1,30 @@
+{
+  "name": "braze-data-exporter",
+  "version": "1.0.0",
+  "description": "Herramienta para exportar datos de usuarios desde Braze",
+  "main": "braze-export-tool.js",
+  "scripts": {
+    "start": "node braze-export-tool.js",
+    "help": "node braze-export-tool.js --help",
+    "export": "node braze-export-tool.js --export",
+    "download": "node braze-export-tool.js --download",
+    "extract": "node braze-export-tool.js --extract",
+    "process": "node braze-export-tool.js --process",
+    "all": "node braze-export-tool.js --all",
+    "continue": "node braze-export-tool.js --continue"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.6.2",
+    "braze-api": "^2.10.1",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "moment": "^2.29.4",
+    "node-cron": "^3.0.3"
+  },
+  "bin": {
+    "braze-export": "./braze-export-tool.js"
+  }
+}
