@@ -12,6 +12,7 @@ package-lock.json
 .env.test
 .env.production
 *.env
+.env.example
 
 # Directorios de datos y exportaciones
 /exports/
